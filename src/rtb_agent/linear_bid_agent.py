@@ -5,7 +5,6 @@ Run this module inside Budget_Constrained_Bidding directory
 import sys,os
 sys.path.append(os.getcwd()+'/src/gym-auction_emulator')
 import gym, gym_auction_emulator
-
 import configparser
 
 """
@@ -81,6 +80,7 @@ def main():
         # done = agent.done()
     print("Total Impressions won {} value = {}".format(agent.total_wins, agent.total_rewards))
     env.close()
+
 
 if __name__ == "__main__":
     main()
