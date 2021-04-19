@@ -57,7 +57,7 @@ class AuctionEmulatorEnv(gym.Env):
                     'click_prob'
                     ]
         dtype = {'click':int, 'weekday': int, 'hour': int, 'bidprice': int, 'slot_price': int, 'payprice': int, 'click_prob': float}
-        self.bid_requests = pd.read_csv(self.file_in, sep=' ', usecols=fields, dtype=dtype)
+        self.bid_requests = pd.read_csv(self.file_in, sep=',', usecols=fields, dtype=dtype)
         self.total_bids = len(self.bid_requests)
         self.bid_line = {}
 
@@ -75,7 +75,7 @@ class AuctionEmulatorEnv(gym.Env):
             'click_prob'
         ]
         dtype = {'click':int, 'weekday': int, 'hour': int, 'bidprice': int, 'slot_price': int, 'payprice': int, 'click_prob': float}
-        self.bid_requests = pd.read_csv(self.file_in, sep=' ', usecols=fields, dtype=dtype)
+        self.bid_requests = pd.read_csv(self.file_in, sep=',', usecols=fields, dtype=dtype)
         self.total_bids = len(self.bid_requests)
         self.bid_line = {}
 

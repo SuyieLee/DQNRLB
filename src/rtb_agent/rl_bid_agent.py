@@ -182,7 +182,7 @@ class RlBidAgent():
                 self.reward_net.add(sa, max_r)
             self.total_wins += self.wins_e
             self.total_spent += self.budget_spend
-            print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(self.budget, self.total_spent,self.total_wins, self.total_rewards))
+            print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(self.budget, self.budget_spend,self.total_wins, self.total_rewards))
             self._reset_episode()
             self.cur_day = state['weekday']
             self.cur_hour = state['hour']
@@ -220,7 +220,7 @@ class RlBidAgent():
         elif state['weekday'] != self.cur_day:
             self.total_wins += self.wins_e
             self.total_spent += self.budget_spend
-            print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(self.budget, self.total_spent,self.total_wins, self.total_rewards))
+            print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(self.budget, self.budget_spend,self.total_wins, self.total_rewards))
             self._reset_episode()
             self.cur_day = state['weekday']
             self.cur_hour = state['hour']
@@ -238,12 +238,11 @@ class RlBidAgent():
 
 
 def main():
-    # Instantiate the Environment and Agent
-    env = gym.make('AuctionEmulator-v0')
-    env.seed(0)
     agent = RlBidAgent()
-
-    for i in range(1):
+    for i in range(5):
+        # Instantiate the Environment and Agent
+        env = gym.make('AuctionEmulator-v0')
+        env.seed(0)
         obs, reward, cost, done = env.reset()
         agent._reset_train()
         agent.cur_day = obs['weekday']
@@ -258,7 +257,7 @@ def main():
             obs = next_obs # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
-        print("Total Impressions won {} value = {}".format(agent.total_wins, agent.total_rewards))
+        print("Total Impressions spent {} won {} value = {}".format(agent.total_spent, agent.total_wins, agent.total_rewards))
 
         print('{} start testing'.format(i + 1))
         env.test_init()
@@ -275,7 +274,7 @@ def main():
             obs = next_obs  # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
-        print("Total Impressions won {} value = {}".format(agent.total_wins, agent.total_rewards))
+        print("Total Impressions spent {} won {} value = {}".format(agent.total_spent, agent.total_wins, agent.total_rewards))
         env.close()
     agent.dqn_agent.savemodel()
 
