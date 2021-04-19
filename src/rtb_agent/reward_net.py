@@ -99,6 +99,10 @@ class RewardNet():
         loss.backward()
         self.optimizer.step()
 
+    def savemodel(self):
+        torch.save(self.reward_net.state_dict(), './rewardnet_model')
+        return
+
 
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""

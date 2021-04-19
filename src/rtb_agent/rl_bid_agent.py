@@ -1,6 +1,8 @@
 import sys,os
 sys.path.append("/Users/a/Budget_Constrained_Bidding/src/gym-auction_emulator")
 import gym, gym_auction_emulator
+import time
+
 import random
 import torch
 import numpy as np
@@ -30,6 +32,7 @@ class RlBidAgent():
         self.ACTION_SIZE = int(cfg['rl_agent']['ACTION_SIZE'])
         self.cmp = self.budget/int(cfg['agent']['train_imp'])
         self.test_imp = int(cfg['agent']['test_imp'])
+        self.test_budget = int(cfg['agent']['test_budget'])*C0
     
     def __init__(self):
         self._load_config()
@@ -37,10 +40,13 @@ class RlBidAgent():
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
-        self.anneal = 0.00005
+        self.anneal = 0.00002
         self._reset_episode()
+        self.dqn_state = None
+        self.dqn_action = 3 # no scaling
+        self.dqn_reward = 0
         # DQN Network to learn Q function
-        self.dqn_agent = Agent(state_size=7, action_size=7, seed =0)
+        self.dqn_agent = Agent(state_size=7, action_size=7, seed=0)
         # Reward Network to reward function
         self.reward_net = RewardNet(state_action_size = 8, reward_size=1, seed =0)
         self.dqn_state = None
@@ -91,7 +97,7 @@ class RlBidAgent():
         self._reset_step()                # 7. Total value of the winning impressions 'click_prob'
         self.cur_day = 1
         self.cur_hour = 0
-        # self.ctl_lambda = 1.0  # Lambda sequential regulation parameter
+        self.ctl_lambda = 1.0  # Lambda sequential regulation parameter
         self.wins_e = 0  
         self.eps = self.eps_start
         self.V = 0
@@ -197,7 +203,7 @@ class RlBidAgent():
         #action是出价
         action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * 1e5,
                         self.budget - self.budget_spend)
-        return action
+        return min(action, 300)
 
     def test_act(self, state, reward, cost):
         episode_done = (state['weekday'] != self.cur_day)
@@ -231,7 +237,7 @@ class RlBidAgent():
             self.wins_e += 1
         action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * 1e5,
                      self.budget - self.budget_spend)
-        return action
+        return min(action, 300)
 
     def done(self):
         return self.budget <= self.budget_spend
@@ -239,7 +245,7 @@ class RlBidAgent():
 
 def main():
     agent = RlBidAgent()
-    for i in range(5):
+    for i in range(1):
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
         env.seed(0)
@@ -257,9 +263,11 @@ def main():
             obs = next_obs # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
-        print("Total Impressions spent {} won {} value = {}".format(agent.total_spent, agent.total_wins, agent.total_rewards))
+        agent.total_spent += agent.budget_spend
+        print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
+        print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
 
-        print('{} start testing'.format(i + 1))
+        print('{} start testing-------------------'.format(i + 1))
         env.test_init()
         obs, reward, cost, done = env.reset()
         agent._reset_train()
@@ -267,6 +275,7 @@ def main():
         agent.cur_hour = obs['hour']
         agent.dqn_state = agent._get_state()
         agent.budget = agent.cmp*agent.test_imp/3
+        # agent.budget = agent.test_budget/3
         while not done:
             # action = bid amount
             action = agent.test_act(obs, reward, cost)
@@ -274,10 +283,16 @@ def main():
             obs = next_obs  # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
-        print("Total Impressions spent {} won {} value = {}".format(agent.total_spent, agent.total_wins, agent.total_rewards))
+        agent.total_spent += agent.budget_spend
+        print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
+        print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
-    agent.dqn_agent.savemodel()
+        # agent.dqn_agent.savemodel()
+        # agent.reward_net.savemodel()
 
 
 if __name__ == "__main__":
+    start = time.time()
     main()
+    end = time.time()
+    print('Running time: %s Seconds' % (end - start))
