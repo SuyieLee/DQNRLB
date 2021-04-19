@@ -266,7 +266,7 @@ def main():
         agent.cur_day = obs['weekday']
         agent.cur_hour = obs['hour']
         agent.dqn_state = agent._get_state()
-        agent.budget = agent.cmp*agent.test_imp
+        agent.budget = agent.cmp*agent.test_imp/3
         while not done:
             # action = bid amount
             action = agent.test_act(obs, reward, cost)
