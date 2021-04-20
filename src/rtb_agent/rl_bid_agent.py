@@ -113,8 +113,8 @@ class RlBidAgent():
         self.prev_budget = self.rem_budget
         self.rem_budget -= self.cost_t
         self.ROL -= 1
-        self.BCR = self.cost_t / self.budget_t      # 预算使用率，更换成预算使用比
-        # self.BCR = (self.rem_budget-self.prev_budget) / self.prev_budget
+        # self.BCR = self.cost_t / self.budget_t      # 预算使用率，更换成预算使用比
+        self.BCR = (self.rem_budget-self.prev_budget) / self.budget_t
         self.CPM = self.cost_t
         self.WR = self.wins_t / self.bids_t
 
@@ -127,7 +127,7 @@ class RlBidAgent():
         self.wins_t = 0
         self.bids_t = 0
         self.budget_t = self.budget * float(self.imp_rate[t]) + rem_b
-        # self.rem_budget = self.budget_t
+        self.rem_budget = self.budget_t
         self.budget_spend_t = 0.0
         self.eps = max(self.eps_start - self.anneal * self.t_step, 0.05)
     
