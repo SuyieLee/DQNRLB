@@ -253,7 +253,7 @@ def main():
     agent.cur_day = obs['weekday']
     agent.cur_hour = obs['hour']
     agent.dqn_state = agent._get_state()
-    print('{} start training--------------------------------------'.format(i+1))
+    print('start training--------------------------------------')
     while not done:
         # action = bid amount
         action = agent.act(obs, reward, cost)
