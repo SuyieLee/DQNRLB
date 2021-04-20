@@ -15,6 +15,8 @@ from reward_net import RewardNet
 import numpy as np
 
 C0 = 1/16
+Q = 1e5
+
 
 class RlBidAgent():
 
@@ -25,14 +27,13 @@ class RlBidAgent():
         cfg = configparser.ConfigParser(allow_no_value=True)
         env_dir = os.path.dirname(__file__)
         cfg.read(env_dir + '/config.cfg')
-        self.budget = int(cfg['agent']['budget'])*C0
+        self.budget = int(cfg['agent']['budget'])
         self.target_value = int(cfg['agent']['target_value'])
         self.T = int(cfg['rl_agent']['T']) # T number of timesteps
         self.STATE_SIZE = int(cfg['rl_agent']['STATE_SIZE'])
         self.ACTION_SIZE = int(cfg['rl_agent']['ACTION_SIZE'])
         self.cmp = self.budget/int(cfg['agent']['train_imp'])
         self.test_imp = int(cfg['agent']['test_imp'])
-        self.test_budget = int(cfg['agent']['test_budget'])*C0
     
     def __init__(self):
         self._load_config()
@@ -40,7 +41,7 @@ class RlBidAgent():
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
-        self.anneal = 0.00002
+        self.anneal = 0.00005
         self._reset_episode()
         self.dqn_state = None
         self.dqn_action = 3 # no scaling
@@ -201,7 +202,7 @@ class RlBidAgent():
             self.wins_t += 1
             self.wins_e += 1
         #action是出价
-        action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * 1e5,
+        action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * Q,
                         self.budget - self.budget_spend)
         return min(action, 300)
 
@@ -235,7 +236,7 @@ class RlBidAgent():
         if cost > 0:
             self.wins_t += 1
             self.wins_e += 1
-        action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * 1e5,
+        action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * Q,
                      self.budget - self.budget_spend)
         return min(action, 300)
 
@@ -254,7 +255,7 @@ def main():
         agent.cur_day = obs['weekday']
         agent.cur_hour = obs['hour']
         agent.dqn_state = agent._get_state()
-        agent.budget = agent.budget/7
+        agent.budget = agent.budget * C0 /7
         print('{} start training--------------------------------------'.format(i+1))
         while not done:
             # action = bid amount
@@ -274,8 +275,7 @@ def main():
         agent.cur_day = obs['weekday']
         agent.cur_hour = obs['hour']
         agent.dqn_state = agent._get_state()
-        agent.budget = agent.cmp*agent.test_imp/3
-        # agent.budget = agent.test_budget/3
+        agent.budget = agent.cmp*agent.test_imp * C0 /3
         while not done:
             # action = bid amount
             action = agent.test_act(obs, reward, cost)
@@ -287,8 +287,6 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
-        # agent.dqn_agent.savemodel()
-        # agent.reward_net.savemodel()
 
 
 if __name__ == "__main__":
