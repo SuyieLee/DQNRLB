@@ -32,10 +32,11 @@ class RlBidAgent():
         self.T = int(cfg['rl_agent']['T']) # T number of timesteps
         self.STATE_SIZE = int(cfg['rl_agent']['STATE_SIZE'])
         self.ACTION_SIZE = int(cfg['rl_agent']['ACTION_SIZE'])
-        self.cmp = self.budget/int(cfg['agent']['train_imp'])
+        self.cmp = int(cfg['agent']['budget'])/int(cfg['agent']['train_imp'])
         self.test_imp = int(cfg['agent']['test_imp'])
         self.imp_rate = cfg['agent']['imp_rate']
         self.imp_rate = self.imp_rate.split(',')
+        self.test_budget = self.cmp * int(cfg['agent']['test_imp']) * C0/3
 
     def __init__(self):
         self._load_config()
@@ -63,6 +64,7 @@ class RlBidAgent():
 
     def _reset_test(self):
         self._load_config()
+        self.budget = self.test_budget
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
