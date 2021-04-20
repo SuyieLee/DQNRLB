@@ -16,7 +16,7 @@ import numpy as np
 
 C0 = 1/16
 Q = 1e5
-
+anneal = 0.00002
 
 class RlBidAgent():
 
@@ -44,7 +44,7 @@ class RlBidAgent():
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
-        self.anneal = 0.00005
+        self.anneal = anneal
         self._reset_episode()
         self.dqn_state = None
         self.dqn_action = 3 # no scaling
@@ -68,7 +68,7 @@ class RlBidAgent():
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
-        self.anneal = 0.00005
+        self.anneal = anneal
         self._reset_episode()
         self.dqn_state = None
         self.dqn_action = 3  # no scaling
