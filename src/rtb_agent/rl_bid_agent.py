@@ -223,7 +223,7 @@ class RlBidAgent():
             self.dqn_action = a_beta
             # print(dqn_next_state, a_beta)
             self.ctl_lambda *= (1 + self.BETA[a_beta])
-            self.budget_spend += self.budget_t
+            self.budget_spend += self.budget_spend_t
             self.cur_hour = state['hour']
             self._reset_step(int(state['hour']), self.rem_budget)
             self._update_reward_cost(reward, cost)
