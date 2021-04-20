@@ -50,9 +50,6 @@ class RlBidAgent():
         self.dqn_agent = Agent(state_size=7, action_size=7, seed=0)
         # Reward Network to reward function
         self.reward_net = RewardNet(state_action_size = 8, reward_size=1, seed =0)
-        self.dqn_state = None
-        self.dqn_action = 3 # no scaling
-        self.dqn_reward = 0
         # Reward-Dictionary
         self.reward_dict = {}
         self.S = []
