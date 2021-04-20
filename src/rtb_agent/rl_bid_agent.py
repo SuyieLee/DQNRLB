@@ -27,14 +27,16 @@ class RlBidAgent():
         cfg = configparser.ConfigParser(allow_no_value=True)
         env_dir = os.path.dirname(__file__)
         cfg.read(env_dir + '/config.cfg')
-        self.budget = int(cfg['agent']['budget'])
+        self.budget = int(cfg['agent']['budget'])*C0/7
         self.target_value = int(cfg['agent']['target_value'])
         self.T = int(cfg['rl_agent']['T']) # T number of timesteps
         self.STATE_SIZE = int(cfg['rl_agent']['STATE_SIZE'])
         self.ACTION_SIZE = int(cfg['rl_agent']['ACTION_SIZE'])
         self.cmp = self.budget/int(cfg['agent']['train_imp'])
         self.test_imp = int(cfg['agent']['test_imp'])
-    
+        self.imp_rate = cfg['agent']['imp_rate']
+        self.imp_rate = self.imp_rate.split(',')
+
     def __init__(self):
         self._load_config()
         # Control parameter used to scale bid price
@@ -59,7 +61,7 @@ class RlBidAgent():
         self.total_spent = 0.0
         self.ctl_lambda = 1.0
 
-    def _reset_train(self):
+    def _reset_test(self):
         self._load_config()
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
@@ -92,7 +94,7 @@ class RlBidAgent():
         self.CPM = 0                      # 5. Cost per mille of impressions between t-1 and t
                                           #       (self.prev_budget - self.running_budget) / self.cur_wins
         self.WR = 0                       # 6. wins_e / total_impressions
-        self._reset_step()                # 7. Total value of the winning impressions 'click_prob'
+        self._reset_step(0, 0)                # 7. Total value of the winning impressions 'click_prob'
         self.cur_day = 1
         self.cur_hour = 0
         self.ctl_lambda = 1.0  # Lambda sequential regulation parameter
@@ -109,11 +111,12 @@ class RlBidAgent():
         self.prev_budget = self.rem_budget
         self.rem_budget -= self.cost_t
         self.ROL -= 1
-        self.BCR = (self.rem_budget - self.prev_budget) / self.prev_budget
+        # self.BCR = self.rem_budget / self.budget_t      # 预算使用率，更换成预算使用比
+        self.BCR = (self.rem_budget-self.prev_budget) / self.budget_t
         self.CPM = self.cost_t
         self.WR = self.wins_t / self.bids_t
 
-    def _reset_step(self):
+    def _reset_step(self, t, rem_b):
         """
         Function to call every time a new time step is entered.
         """
@@ -121,6 +124,9 @@ class RlBidAgent():
         self.cost_t = 0.
         self.wins_t = 0
         self.bids_t = 0
+        self.budget_t = self.budget * float(self.imp_rate[t]) + rem_b
+        self.rem_budget = self.budget_t
+        self.budget_spend_t = 0.0
         self.eps = max(self.eps_start - self.anneal * self.t_step, 0.05)
     
     def _update_reward_cost(self, reward, cost):
@@ -172,8 +178,9 @@ class RlBidAgent():
             self.dqn_action = a_beta
             # print(dqn_next_state, a_beta)
             self.ctl_lambda *= (1 + self.BETA[a_beta])
+            self.budget_spend += self.budget_spend_t
             self.cur_hour = state['hour']
-            self._reset_step()
+            self._reset_step(int(state['hour']), self.rem_budget)
             self._update_reward_cost(reward, cost)
             self.V += self.reward_t
             self.S.append((self.dqn_state, self.dqn_action))
@@ -194,13 +201,12 @@ class RlBidAgent():
 
         # action = bid amount
         # send the best estimate of the bid
-        self.budget_spend += cost
+        self.budget_spend_t += cost
         if cost > 0:
             self.wins_t += 1
             self.wins_e += 1
         #action是出价
-        action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * Q,
-                        self.budget - self.budget_spend)
+        action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * Q, self.budget_t - self.budget_spend_t)
         return min(action, 300)
 
     def test_act(self, state, reward, cost):
@@ -217,8 +223,9 @@ class RlBidAgent():
             self.dqn_action = a_beta
             # print(dqn_next_state, a_beta)
             self.ctl_lambda *= (1 + self.BETA[a_beta])
+            self.budget_spend += self.budget_t
             self.cur_hour = state['hour']
-            self._reset_step()
+            self._reset_step(int(state['hour']), self.rem_budget)
             self._update_reward_cost(reward, cost)
         # episode changes
         elif state['weekday'] != self.cur_day:
@@ -229,12 +236,12 @@ class RlBidAgent():
             self.cur_day = state['weekday']
             self.cur_hour = state['hour']
             self._update_reward_cost(reward, cost)
-        self.budget_spend += cost
+        self.budget_spend_t += cost
         if cost > 0:
             self.wins_t += 1
             self.wins_e += 1
         action = min(self.ctl_lambda * self.target_value * float(state['click_prob']) * Q,
-                     self.budget - self.budget_spend)
+                     self.budget_t - self.budget_spend_t)
         return min(action, 300)
 
     def done(self):
@@ -242,48 +249,47 @@ class RlBidAgent():
 
 
 def main():
+    # Instantiate the Environment and Agent
+    env = gym.make('AuctionEmulator-v0')
+    env.seed(0)
+    obs, reward, cost, done = env.reset()
     agent = RlBidAgent()
-    for i in range(1):
-        # Instantiate the Environment and Agent
-        env = gym.make('AuctionEmulator-v0')
-        env.seed(0)
-        obs, reward, cost, done = env.reset()
-        agent._reset_train()
-        agent.cur_day = obs['weekday']
-        agent.cur_hour = obs['hour']
-        agent.dqn_state = agent._get_state()
-        agent.budget = agent.budget * C0 /7
-        print('{} start training--------------------------------------'.format(i+1))
-        while not done:
-            # action = bid amount
-            action = agent.act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
-            obs = next_obs # Next state assigned to current state
-            # done = agent.done()
-        agent.total_wins += agent.wins_e
-        agent.total_spent += agent.budget_spend
-        print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
-        print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
+    agent.cur_day = obs['weekday']
+    agent.cur_hour = obs['hour']
+    agent.dqn_state = agent._get_state()
+    print('start training--------------------------------------')
+    while not done:
+        # action = bid amount
+        action = agent.act(obs, reward, cost)
+        next_obs, reward, cost, done = env.step(action)
+        obs = next_obs # Next state assigned to current state
+        # done = agent.done()
+    agent.total_wins += agent.wins_e
+    agent.total_spent += agent.budget_spend
+    print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
+    print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
 
-        print('{} start testing-------------------'.format(i + 1))
-        env.test_init()
-        obs, reward, cost, done = env.reset()
-        agent._reset_train()
-        agent.cur_day = obs['weekday']
-        agent.cur_hour = obs['hour']
-        agent.dqn_state = agent._get_state()
-        agent.budget = agent.cmp*agent.test_imp * C0 /3
-        while not done:
-            # action = bid amount
-            action = agent.test_act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
-            obs = next_obs  # Next state assigned to current state
-            # done = agent.done()
-        agent.total_wins += agent.wins_e
-        agent.total_spent += agent.budget_spend
-        print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
-        print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
-        env.close()
+
+    #test
+    print('start testing-------------------')
+    env.test_init()
+    obs, reward, cost, done = env.reset()
+    agent._reset_test()
+    # agent.budget = agent.cmp*agent.test_imp * C0 /3
+    agent.cur_day = obs['weekday']
+    agent.cur_hour = obs['hour']
+    agent.dqn_state = agent._get_state()
+    while not done:
+        # action = bid amount
+        action = agent.test_act(obs, reward, cost)
+        next_obs, reward, cost, done = env.step(action)
+        obs = next_obs  # Next state assigned to current state
+        # done = agent.done()
+    agent.total_wins += agent.wins_e
+    agent.total_spent += agent.budget_spend
+    print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
+    print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
+    env.close()
 
 
 if __name__ == "__main__":
