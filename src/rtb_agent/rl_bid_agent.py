@@ -27,7 +27,7 @@ class RlBidAgent():
         cfg = configparser.ConfigParser(allow_no_value=True)
         env_dir = os.path.dirname(__file__)
         cfg.read(env_dir + '/config.cfg')
-        self.budget = int(cfg['agent']['budget'])
+        self.budget = int(cfg['agent']['budget'])*C0 /7
         self.target_value = int(cfg['agent']['target_value'])
         self.T = int(cfg['rl_agent']['T']) # T number of timesteps
         self.STATE_SIZE = int(cfg['rl_agent']['STATE_SIZE'])
@@ -59,7 +59,7 @@ class RlBidAgent():
         self.total_spent = 0.0
         self.ctl_lambda = 1.0
 
-    def _reset_train(self):
+    def _reset_test(self):
         self._load_config()
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
@@ -242,48 +242,46 @@ class RlBidAgent():
 
 
 def main():
-    agent = RlBidAgent()
-    for i in range(1):
-        # Instantiate the Environment and Agent
-        env = gym.make('AuctionEmulator-v0')
-        env.seed(0)
-        obs, reward, cost, done = env.reset()
-        agent._reset_train()
-        agent.cur_day = obs['weekday']
-        agent.cur_hour = obs['hour']
-        agent.dqn_state = agent._get_state()
-        agent.budget = agent.budget * C0 /7
-        print('{} start training--------------------------------------'.format(i+1))
-        while not done:
-            # action = bid amount
-            action = agent.act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
-            obs = next_obs # Next state assigned to current state
-            # done = agent.done()
-        agent.total_wins += agent.wins_e
-        agent.total_spent += agent.budget_spend
-        print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
-        print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
 
-        print('{} start testing-------------------'.format(i + 1))
-        env.test_init()
-        obs, reward, cost, done = env.reset()
-        agent._reset_train()
-        agent.cur_day = obs['weekday']
-        agent.cur_hour = obs['hour']
-        agent.dqn_state = agent._get_state()
-        agent.budget = agent.cmp*agent.test_imp * C0 /3
-        while not done:
-            # action = bid amount
-            action = agent.test_act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
-            obs = next_obs  # Next state assigned to current state
-            # done = agent.done()
-        agent.total_wins += agent.wins_e
-        agent.total_spent += agent.budget_spend
-        print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
-        print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
-        env.close()
+
+    # Instantiate the Environment and Agent
+    env = gym.make('AuctionEmulator-v0')
+    env.seed(0)
+    obs, reward, cost, done = env.reset()
+    agent = RlBidAgent()
+    agent.cur_day = obs['weekday']
+    agent.cur_hour = obs['hour']
+    agent.dqn_state = agent._get_state()
+    print(' start training--------------------------------------')
+    while not done:
+        # action = bid amount
+        action = agent.act(obs, reward, cost)
+        next_obs, reward, cost, done = env.step(action)
+        obs = next_obs # Next state assigned to current state
+        # done = agent.done()
+    agent.total_wins += agent.wins_e
+    agent.total_spent += agent.budget_spend
+    print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
+    print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
+
+    print(' start testing-------------------')
+    env.test_init()
+    obs, reward, cost, done = env.reset()
+    agent._reset_test()
+    agent.cur_day = obs['weekday']
+    agent.cur_hour = obs['hour']
+    agent.dqn_state = agent._get_state()
+    while not done:
+        # action = bid amount
+        action = agent.test_act(obs, reward, cost)
+        next_obs, reward, cost, done = env.step(action)
+        obs = next_obs  # Next state assigned to current state
+        # done = agent.done()
+    agent.total_wins += agent.wins_e
+    agent.total_spent += agent.budget_spend
+    print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
+    print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
+    env.close()
 
 
 if __name__ == "__main__":
