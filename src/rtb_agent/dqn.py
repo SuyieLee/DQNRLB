@@ -18,7 +18,7 @@ BATCH_SIZE = 32         # minibatch size
 GAMMA = 1.0            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR = 1e-3               # learning rate 
-UPDATE_EVERY = 100        # how often to update the network
+UPDATE_EVERY = 12         # how often to update the network
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
