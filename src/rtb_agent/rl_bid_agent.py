@@ -17,6 +17,8 @@ import numpy as np
 C0 = 1/16
 Q = 1e5
 anneal = 0.00005
+lamda = 1.0
+C=8
 
 class RlBidAgent():
 
@@ -48,9 +50,9 @@ class RlBidAgent():
         self.dqn_action = 3 # no scaling
         self.dqn_reward = 0
         # DQN Network to learn Q function
-        self.dqn_agent = Agent(state_size=7, action_size=7, seed=0)
+        self.dqn_agent = Agent(state_size=7, action_size=7, UPDATE_EVERY=C, seed=0)
         # Reward Network to reward function
-        self.reward_net = RewardNet(state_action_size = 8, reward_size=1, seed =0)
+        self.reward_net = RewardNet(state_action_size = 8,  reward_size=1, seed =0)
         # Reward-Dictionary
         self.reward_dict = {}
         self.S = []
@@ -58,7 +60,7 @@ class RlBidAgent():
         self.total_wins = 0
         self.total_rewards = 0.0
         self.total_spent = 0.0
-        self.ctl_lambda = 1.0
+        self.ctl_lambda = lamda
 
     def _reset_test(self):
         # self._load_config()
@@ -78,7 +80,7 @@ class RlBidAgent():
         self.total_wins = 0
         self.total_rewards = 0.0
         self.total_spent = 0.0
-        self.ctl_lambda = 1.0
+        self.ctl_lambda = lamda
 
     def _reset_episode(self):
         """
@@ -97,7 +99,7 @@ class RlBidAgent():
         self._reset_step()                # 7. Total value of the winning impressions 'click_prob'
         self.cur_day = 1
         self.cur_hour = 0
-        self.ctl_lambda = 1.0  # Lambda sequential regulation parameter
+        self.ctl_lambda = lamda  # Lambda sequential regulation parameter
         self.wins_e = 0  
         self.eps = self.eps_start
         self.V = 0
@@ -242,7 +244,10 @@ class RlBidAgent():
 
 
 def main():
-    for i in range(1):
+    global C
+    for i in range(100):
+        C += 1
+        print(C)
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
         env.seed(0)

@@ -18,14 +18,14 @@ BATCH_SIZE = 32         # minibatch size
 GAMMA = 1.0            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR = 1e-3               # learning rate 
-UPDATE_EVERY = 12         # how often to update the network
+# UPDATE_EVERY = 12         # how often to update the network
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, seed):
+    def __init__(self, state_size, action_size, UPDATE_EVERY, seed):
         """Initialize an Agent object.
         
         Params
@@ -34,6 +34,7 @@ class Agent():
             action_size (int): dimension of each action
             seed (int): random seed
         """
+        self.C = UPDATE_EVERY
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(seed)
@@ -53,7 +54,7 @@ class Agent():
         self.memory.add(state, action, reward, next_state, done)
         
         # Learn every UPDATE_EVERY time steps.
-        self.t_step = (self.t_step + 1) % UPDATE_EVERY
+        self.t_step = (self.t_step + 1) % self.C
         if self.t_step == 0:
             # If enough samples are available in memory, get random subset and learn
             # if len(self.memory) > BATCH_SIZE:
