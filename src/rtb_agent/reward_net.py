@@ -31,7 +31,7 @@ class RewardNet():
         self.seed = random.seed(seed)
 
         # Reward-Network
-        self.reward_net = RewardNetwork(state_action_size, reward_size, seed).to(device)
+        self.reward_net = Network(state_action_size, reward_size, seed).to(device)
         self.optimizer = optim.Adam(self.reward_net.parameters(), lr=LR)
 
         # Replay memory
