@@ -3,9 +3,9 @@ Run this module inside Budget_Constrained_Bidding directory
 %python3 src/rtb_agent/constant_bid_agent.py
 """
 import sys,os
-sys.path.append(os.getcwd()+'/src/gym-auction_emulator')
+sys.path.append("/Users/a/Budget_Constrained_Bidding/src/gym-auction_emulator")
+# sys.path.append(os.getcwd()+'/src/gym-auction_emulator')
 import gym, gym_auction_emulator
-
 import configparser
 
 """
@@ -13,6 +13,8 @@ Simple toy constant bidding agent that constantly bids $1 until budget runs out
 This is an example to show the OpenAI gym interface for the 
     Budget Constrained Bidding problem.
 """
+
+C0 = 1/16
 
 class LinearBidAgent():
 
@@ -23,7 +25,7 @@ class LinearBidAgent():
         cfg = configparser.ConfigParser(allow_no_value=True)
         env_dir = os.path.dirname(__file__)
         cfg.read(env_dir + '/config.cfg')
-        self.budget = int(cfg['agent']['budget'])
+        self.budget = int(cfg['agent']['budget'])/int(cfg['agent']['train_imp']) * int(cfg['agent']['test_imp']) * C0
         self.target_value = int(cfg['agent']['target_value'])
  
     def __init__(self):
@@ -38,7 +40,7 @@ class LinearBidAgent():
 
         # episode done
         if state['weekday'] != self.cur_day:
-            print("Total Impressions won with Budget={} Spend={} wins = {}".format(self.budget, self.budget_spend, self.wins_e))
+            print("Total Impressions won with Budget={} Spend={} wins = {} reward = {}".format(self.budget, self.budget_spend, self.total_wins, self.total_rewards))
             # reallocate budget
             self.budget_spend = 0
             # reset episode wins
@@ -57,7 +59,7 @@ class LinearBidAgent():
             self.total_wins += 1
             self.total_rewards += reward
 
-        action = min(self.target_value * state['click_prob'],
+        action = min(self.target_value * state['click_prob'] * 1e5,
                         (self.budget - self.budget_spend))
 
         return action
@@ -79,8 +81,11 @@ def main():
         next_obs, reward, cost, done = env.step(action)
         obs = next_obs # Next state assigned to current state
         # done = agent.done()
+    print("Total Impressions won with Budget={} Spend={} wins = {} reward = {}".format(agent.budget, agent.budget_spend,
+                                                                                       agent.total_wins, agent.total_rewards))
     print("Total Impressions won {} value = {}".format(agent.total_wins, agent.total_rewards))
     env.close()
+
 
 if __name__ == "__main__":
     main()
