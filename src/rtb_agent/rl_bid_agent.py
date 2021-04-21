@@ -18,7 +18,7 @@ C0 = 1/16
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
-C=5
+C=4
 
 class RlBidAgent():
 
@@ -251,7 +251,6 @@ class RlBidAgent():
 def main():
     global C
     for i in range(100):
-        C += 1
         print(C)
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
@@ -291,6 +290,7 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
+        C += 2
 
 
 if __name__ == "__main__":
