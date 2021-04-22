@@ -244,10 +244,7 @@ class RlBidAgent():
 
 
 def main():
-    global C
     for i in range(100):
-        C += 2
-        print(C)
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
         env.seed(0)
