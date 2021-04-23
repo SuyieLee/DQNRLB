@@ -20,6 +20,10 @@ anneal = 0.00005
 lamda = 1.0
 C=12
 
+beta_start = 0.1
+beta_frames = 96
+beta_by_frame = lambda frame_idx: min(1.0, beta_start + frame_idx * (1.0 - beta_start) / beta_frames)
+
 class RlBidAgent():
 
     def _load_config(self):
@@ -171,7 +175,8 @@ class RlBidAgent():
             sa = np.append(self.dqn_state, self.dqn_action)
             rnet_r = float(self.reward_net.act(sa))
             # call agent step
-            self.dqn_agent.step(self.dqn_state, self.dqn_action, rnet_r, dqn_next_state, episode_done)
+            beta = beta_by_frame(self.t_step)
+            self.dqn_agent.step(self.dqn_state, self.dqn_action, rnet_r, dqn_next_state, episode_done, beta)
             self.dqn_state = dqn_next_state
             self.dqn_action = a_beta
             # print(dqn_next_state, a_beta)
@@ -244,7 +249,7 @@ class RlBidAgent():
 
 
 def main():
-    for i in range(100):
+    for i in range(1):
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
         env.seed(0)
