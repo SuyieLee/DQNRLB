@@ -7,7 +7,7 @@ import numpy as np
 import random
 from collections import namedtuple, deque
 
-from model import Network
+from model import Network, NoisyDQN
 
 import torch
 import torch.nn.functional as F
@@ -40,8 +40,8 @@ class Agent():
         self.seed = random.seed(seed)
 
         # Q-Network
-        self.qnetwork_local = Network(state_size, action_size, seed).to(device)
-        self.qnetwork_target = Network(state_size, action_size, seed).to(device)
+        self.qnetwork_local = NoisyDQN(state_size, action_size, seed).to(device)
+        self.qnetwork_target = NoisyDQN(state_size, action_size, seed).to(device)
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=LR)
 
         # Replay memory
@@ -113,6 +113,8 @@ class Agent():
         self.optimizer.step()
 
         # ------------------- update target network ------------------- #
+        self.qnetwork_target.reset_noise()
+        self.qnetwork_local.reset_noise()
         self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
 
     def soft_update(self, local_model, target_model, tau):
