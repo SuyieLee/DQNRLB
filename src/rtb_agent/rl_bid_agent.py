@@ -18,7 +18,7 @@ C0 = 1/16
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
-C=4
+C=12
 
 class RlBidAgent():
 
@@ -249,7 +249,7 @@ class RlBidAgent():
 
 
 def main():
-    global C
+    # global C
     for i in range(100):
         print(C)
         # Instantiate the Environment and Agent
@@ -290,7 +290,7 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
-        C += 2
+        # C += 2
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ BATCH_SIZE = 32         # minibatch size
 GAMMA = 1.0            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR = 1e-3               # learning rate 
-UPDATE_EVERY = 4        # how often to update the network
+# UPDATE_EVERY = 12         # how often to update the network
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -97,15 +97,21 @@ class Agent():
         states, actions, rewards, next_states, dones = experiences
 
         # Get max predicted Q values (for next states) from target model
-        Q_targets_next = self.qnetwork_target(next_states).detach().max(1)[0].unsqueeze(1)
-        # Compute Q targets for current states 
-        Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
+        # Q_targets_next = self.qnetwork_target(next_states).detach().max(1)[0].unsqueeze(1)
+        # # Compute Q targets for current states
+        # Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
+        #
+        # # Get expected Q values from local model
+        # Q_expected = self.qnetwork_local(states).gather(1, actions)
 
-        # Get expected Q values from local model
-        Q_expected = self.qnetwork_local(states).gather(1, actions)
+        q_value = self.qnetwork_local(states).gather(1, actions)
+
+        next_q_values = self.qnetwork_local(next_states)
+        next_q_value = self.qnetwork_target(next_states).detach().gather(1, torch.max(next_q_values, 1)[1].unsqueeze(1))
+        expected_q_value = rewards + gamma * next_q_value * (1 - dones)
 
         # Compute loss
-        loss = F.mse_loss(Q_expected, Q_targets)
+        loss = F.mse_loss(q_value, expected_q_value.data)
         # print("DQN loss = {}".format(loss))
         # Minimize the loss
         self.optimizer.zero_grad()
