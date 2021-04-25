@@ -15,7 +15,7 @@ from reward_net import RewardNet
 import numpy as np
 
 C0 = 1/16
-Q = 1e5
+Q = 1e4
 anneal = 0.00005
 lamda = 1.0
 C=12
@@ -182,6 +182,7 @@ class RlBidAgent():
             self.dqn_action = a_beta
             # print(dqn_next_state, a_beta)
             self.ctl_lambda *= (1 + self.BETA[a_beta])
+            self.budget_spend += self.budget_spend_t
             self.cur_hour = state['hour']
             self._reset_step(int(state['hour']), self.rem_budget)
             self._update_reward_cost(reward, cost)
@@ -224,6 +225,7 @@ class RlBidAgent():
             a_beta = self.dqn_agent.test_act(dqn_next_state, eps=self.eps)
             # print(dqn_next_state, a_beta)
             self.ctl_lambda *= (1 + self.BETA[a_beta])
+            self.budget_spend += self.budget_spend_t
             self.cur_hour = state['hour']
             self._reset_step(int(state['hour']), self.rem_budget)
             self._update_reward_cost(reward, cost)
@@ -250,7 +252,7 @@ class RlBidAgent():
 
 def main():
     # global C
-    for i in range(100):
+    for i in range(2):
         print(C)
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
@@ -294,7 +296,7 @@ def main():
 
 
 if __name__ == "__main__":
-    print("budget")
+    print("budget-double")
     start = time.time()
     main()
     end = time.time()
