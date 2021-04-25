@@ -20,7 +20,7 @@ anneal = 0.00005
 lamda = 1.0
 C=12
 
-beta_start = 0.2
+beta_start = 0.4
 beta_frames = 96
 beta_by_frame = lambda frame_idx: min(1.0, beta_start + frame_idx * (1.0 - beta_start) / beta_frames)
 
@@ -290,7 +290,7 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
-        beta_start += 0.1
+        # beta_start += 0.1
 
 
 if __name__ == "__main__":

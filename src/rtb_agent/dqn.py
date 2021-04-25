@@ -188,7 +188,7 @@ class NaivePrioritizedBuffer(object):
         rewards = torch.from_numpy(np.vstack([e[2] for e in samples if e is not None])).float().to(device)
         next_states = torch.from_numpy(np.vstack([e[3] for e in samples if e is not None])).float().to(device)
         dones = torch.from_numpy(np.vstack([e[4] for e in samples if e is not None]).astype(np.uint8)).float().to(device)
-        weights = torch.FloatTensor(weights)
+        weights = torch.FloatTensor(weights).to(device)
         return states, actions, rewards, next_states, dones, indices, weights
 
     def update_priorities(self, batch_indices, batch_priorities):
