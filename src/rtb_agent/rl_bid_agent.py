@@ -246,7 +246,7 @@ class RlBidAgent():
 def main():
     global C
     for i in range(1):
-        print(C)
+        print("duelingdqn Q={} C={}".format(Q, C))
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
         env.seed(0)
@@ -289,7 +289,6 @@ def main():
 
 
 if __name__ == "__main__":
-    print("duelingdqn Q={} C={}".format(Q, C))
     start = time.time()
     main()
     end = time.time()
