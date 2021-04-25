@@ -18,7 +18,7 @@ C0 = 1/16
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
-C=12
+C=4
 
 class RlBidAgent():
 
@@ -246,7 +246,6 @@ class RlBidAgent():
 def main():
     global C
     for i in range(1):
-        # C += 1
         print(C)
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
@@ -290,7 +289,7 @@ def main():
 
 
 if __name__ == "__main__":
-    print("duelingdqn")
+    print("duelingdqn Q={} C={}".format(Q, C))
     start = time.time()
     main()
     end = time.time()
