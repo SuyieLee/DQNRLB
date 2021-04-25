@@ -7,7 +7,7 @@ import numpy as np
 import random
 from collections import namedtuple, deque, defaultdict
 
-from model import Network
+from model import Network, RewardNetwork
 
 import torch
 import torch.nn.functional as F

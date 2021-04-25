@@ -98,11 +98,20 @@ class Agent():
             gamma (float): discount factor
         """
         state, action, reward, next_state, done, indices, weights = self.memory.sample(beta)
+        # q_value = self.qnetwork_local(state).gather(1, action)
+        #
+        # next_q_values = self.qnetwork_local(next_state)
+        # next_q_value = self.qnetwork_target(next_state).detach().gather(1, torch.max(next_q_values, 1)[1].unsqueeze(1))
+        # expected_q_value = reward + gamma * next_q_value * (1 - done)
+
         q_value = self.qnetwork_local(state).gather(1, action)
 
         next_q_values = self.qnetwork_local(next_state)
         next_q_value = self.qnetwork_target(next_state).detach().gather(1, torch.max(next_q_values, 1)[1].unsqueeze(1))
         expected_q_value = reward + gamma * next_q_value * (1 - done)
+
+        # Compute loss
+        # loss = F.mse_loss(q_value, expected_q_value.data)
 
         loss = (q_value.squeeze(1) - expected_q_value.data.squeeze(1)).pow(2) * weights
         prios = loss + 1e-5
