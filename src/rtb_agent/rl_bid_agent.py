@@ -245,7 +245,7 @@ class RlBidAgent():
 
 def main():
     global C
-    for i in range(1):
+    for i in range(10):
         print("duelingdqn Q={} C={}".format(Q, C))
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
