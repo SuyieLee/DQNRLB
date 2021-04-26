@@ -40,8 +40,8 @@ class Agent():
         self.seed = random.seed(seed)
 
         # Q-Network
-        self.qnetwork_local = NoisyDQN(state_size, action_size, seed).to(device)
-        self.qnetwork_target = NoisyDQN(state_size, action_size, seed).to(device)
+        self.qnetwork_local = NoisyDQN(state_size, action_size).to(device)
+        self.qnetwork_target = NoisyDQN(state_size, action_size).to(device)
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=LR)
 
         # Replay memory
