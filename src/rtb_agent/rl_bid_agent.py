@@ -18,7 +18,7 @@ C0 = 1/16
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
-C=4
+C=12
 
 class RlBidAgent():
 
@@ -63,8 +63,8 @@ class RlBidAgent():
         self.ctl_lambda = lamda
 
     def _reset_test(self):
-        # self._load_config()
-        self.budget = self.test_budget
+        self._load_config()
+        # self.budget = self.test_budget
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
