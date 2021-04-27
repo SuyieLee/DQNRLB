@@ -125,16 +125,17 @@ class AuctionEmulatorEnv(gym.Env):
             raise ValueError(f"Invalid metric type: {self.metric}")
 
         # mkt_price = max(self.slotprice, self.payprice)
-        mkt_price = self.payprice
-        if action > mkt_price:
-            # if self.auction_type == 'SECOND_PRICE':
-            r = r_p
-            c = mkt_price
-            # elif self.auction_type == 'FIRST_PRICE':
-            # r = r_p
-            # c = action
-            # else:
-            #     raise ValueError(f"Invalid auction type: {self.auction_type}")
+        if self.click_prob > 1e-3:
+            mkt_price = self.payprice
+            if action > mkt_price:
+                # if self.auction_type == 'SECOND_PRICE':
+                r = r_p
+                c = mkt_price
+                # elif self.auction_type == 'FIRST_PRICE':
+                # r = r_p
+                # c = action
+                # else:
+                #     raise ValueError(f"Invalid auction type: {self.auction_type}")
 
         next_bid = None
         if self._step < self.total_bids - 1:
