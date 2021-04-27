@@ -20,6 +20,21 @@ anneal = 0.00005
 lamda = 1.0
 C=12
 
+
+def figclick():
+    click_rate = []
+    sum = 0.0
+    for x in range(96):
+        # click = -1.364e-07*x*x*x + 1.979e-05*x*x - 0.0006152*x + 0.009323
+        # click = 3.682e-09*x*x*x*x-8.519e-07*x*x*x + 6.418e-05*x*x - 0.001561*x + 0.01405
+        click = -1.523e-07*x*x*x + 2.16e-05*x*x - 0.0006727*x + 0.01003
+        sum += click
+        click_rate.append(click)
+    for x in range(96):
+        click_rate[x] = click_rate[x]/sum
+    return click_rate
+
+
 class RlBidAgent():
 
     def _load_config(self):
@@ -38,6 +53,7 @@ class RlBidAgent():
         self.test_imp = int(cfg['agent']['test_imp'])
         self.click_rate = cfg['agent']['click_rate']
         self.click_rate = self.click_rate.split(',')
+        # self.click_rate = figclick()
         self.test_budget = self.cmp * int(cfg['agent']['test_imp']) * C0/3
 
     def __init__(self):
@@ -129,6 +145,7 @@ class RlBidAgent():
         self.wins_t = 0
         self.bids_t = 0
         self.res = self.budget - self.budget_spend
+        # self.budget_t = self.budget * float(self.click_rate[t]) if float(self.click_rate[t]) > 0 else self.res
         self.p = 0.0
         for i in range(t, 96):
             self.p += float(self.click_rate[i])
