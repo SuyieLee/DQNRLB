@@ -18,7 +18,7 @@ C0 = 1/16
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
-C=4
+C=12
 
 class RlBidAgent():
 
@@ -36,8 +36,8 @@ class RlBidAgent():
         self.ACTION_SIZE = int(cfg['rl_agent']['ACTION_SIZE'])
         self.cmp = int(cfg['agent']['budget'])/int(cfg['agent']['train_imp'])
         self.test_imp = int(cfg['agent']['test_imp'])
-        self.imp_rate = cfg['agent']['imp_rate']
-        self.imp_rate = self.imp_rate.split(',')
+        self.click_rate = cfg['agent']['click_rate']
+        self.click_rate = self.click_rate.split(',')
         self.test_budget = self.cmp * int(cfg['agent']['test_imp']) * C0/3
 
     def __init__(self):
@@ -128,7 +128,11 @@ class RlBidAgent():
         self.cost_t = 0.
         self.wins_t = 0
         self.bids_t = 0
-        self.budget_t = self.budget * float(self.imp_rate[t]) + rem_b
+        self.res = self.budget - self.budget_spend
+        self.p = 0.0
+        for i in range(t, 96):
+            self.p += float(self.click_rate[i])
+        self.budget_t = self.res * float(self.click_rate[t])/self.p
         self.rem_budget = self.budget_t
         self.budget_spend_t = 0.0
         self.eps = max(self.eps_start - self.anneal * self.t_step, 0.05)
