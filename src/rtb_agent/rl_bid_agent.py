@@ -18,7 +18,7 @@ C0 = 1/16
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
-C=4
+C=12
 
 class RlBidAgent():
 
@@ -65,8 +65,8 @@ class RlBidAgent():
         self.ctl_lambda = lamda
 
     def _reset_test(self):
-        # self._load_config()
-        self.budget = self.test_budget
+        self._load_config()
+        # self.budget = self.test_budget
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
@@ -116,7 +116,7 @@ class RlBidAgent():
         self.rem_budget -= self.cost_t
         self.ROL -= 1
         # self.BCR = self.cost_t / self.budget_t      # 预算使用率，更换成预算使用比
-        self.BCR = (self.rem_budget-self.prev_budget) / self.budget_t
+        self.BCR = (self.rem_budget-self.prev_budget) / self.prev_budget
         self.CPM = self.cost_t
         self.WR = self.wins_t / self.bids_t
 
@@ -128,8 +128,12 @@ class RlBidAgent():
         self.cost_t = 0.
         self.wins_t = 0
         self.bids_t = 0
-        self.budget_t = self.budget * float(self.imp_rate[t]) + rem_b
-        self.rem_budget = self.budget_t
+        self.res = self.budget - self.budget_spend
+        self.p = 0.0
+        for i in range(t, 96):
+            self.p += float(self.imp_rate[i])
+        self.budget_t = self.res * float(self.imp_rate[t])/self.p if self.p > 0 else self.res
+        # self.rem_budget = self.budget_t
         self.budget_spend_t = 0.0
         self.eps = max(self.eps_start - self.anneal * self.t_step, 0.05)
     
@@ -182,6 +186,7 @@ class RlBidAgent():
             self.dqn_action = a_beta
             # print(dqn_next_state, a_beta)
             self.ctl_lambda *= (1 + self.BETA[a_beta])
+            self.budget_spend += self.budget_spend_t
             self.cur_hour = state['hour']
             self._reset_step(int(state['hour']), self.rem_budget)
             self._update_reward_cost(reward, cost)
@@ -222,6 +227,7 @@ class RlBidAgent():
             # Sample a mini batch and perform grad-descent step
             dqn_next_state = self._get_state()
             a_beta = self.dqn_agent.test_act(dqn_next_state, eps=self.eps)
+            self.budget_spend += self.budget_spend_t
             # print(dqn_next_state, a_beta)
             self.ctl_lambda *= (1 + self.BETA[a_beta])
             self.cur_hour = state['hour']
