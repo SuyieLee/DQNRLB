@@ -25,7 +25,7 @@ def figclick():
     click_rate = []
     sum = 0.0
     for x in range(96):
-        # click = -1.364e-07*x*x*x + 1.979e-05*x*x - 0.0006152*x + 0.009323
+        # click = -1.364e-07*x*x*x + 1.979e-05*x*x - 0.0006152*x + 0.009323   #7天
         # click = 3.682e-09*x*x*x*x-8.519e-07*x*x*x + 6.418e-05*x*x - 0.001561*x + 0.01405
         click = -1.523e-07*x*x*x + 2.16e-05*x*x - 0.0006727*x + 0.01003
         sum += click
@@ -51,9 +51,9 @@ class RlBidAgent():
         self.ACTION_SIZE = int(cfg['rl_agent']['ACTION_SIZE'])
         self.cmp = int(cfg['agent']['budget'])/int(cfg['agent']['train_imp'])
         self.test_imp = int(cfg['agent']['test_imp'])
-        self.click_rate = cfg['agent']['click_rate']
-        self.click_rate = self.click_rate.split(',')
-        # self.click_rate = figclick()
+        # self.click_rate = cfg['agent']['imp_rate']
+        # self.click_rate = self.click_rate.split(',')
+        self.click_rate = figclick()
         self.test_budget = self.cmp * int(cfg['agent']['test_imp']) * C0/3
 
     def __init__(self):
@@ -81,8 +81,8 @@ class RlBidAgent():
         self.ctl_lambda = lamda
 
     def _reset_test(self):
-        # self._load_config()
-        self.budget = self.test_budget
+        self._load_config()
+        # self.budget = self.test_budget
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
