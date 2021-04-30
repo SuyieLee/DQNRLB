@@ -74,12 +74,18 @@ class Agent():
         with torch.no_grad():
             action_values = self.qnetwork_local(state)
         self.qnetwork_local.train()
-
-        # Epsilon-greedy action selection
-        if random.random() > eps:
-            return np.argmax(action_values.cpu().data.numpy())
+        if self.normal(action_values.cpu().data.numpy()[0]):
+            # Epsilon-greedy action selection
+            if random.random() > max(eps, 0.5):
+                return np.argmax(action_values.cpu().data.numpy())
+            else:
+                return random.choice(np.arange(self.action_size))
         else:
-            return random.choice(np.arange(self.action_size))
+            # Epsilon-greedy action selection
+            if random.random() > eps:
+                return np.argmax(action_values.cpu().data.numpy())
+            else:
+                return random.choice(np.arange(self.action_size))
 
     def test_act(self, state, eps=0.):
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
@@ -130,6 +136,16 @@ class Agent():
     def savemodel(self):
         torch.save(self.qnetwork_local.state_dict(), './model')
         return
+
+    def normal(self, arr):
+        index = np.argmax(arr)
+        for i in range(index, 7):
+            if arr[i] > arr[i-1]:
+                return False
+        for i in range(0, index):
+            if arr[i] > arr[i+1]:
+                return False
+        return True
 
 
 class ReplayBuffer:
