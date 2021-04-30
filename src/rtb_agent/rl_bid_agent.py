@@ -51,9 +51,9 @@ class RlBidAgent():
         self.ACTION_SIZE = int(cfg['rl_agent']['ACTION_SIZE'])
         self.cmp = int(cfg['agent']['budget'])/int(cfg['agent']['train_imp'])
         self.test_imp = int(cfg['agent']['test_imp'])
-        self.click_rate = cfg['agent']['com']
-        self.click_rate = self.click_rate.split(',')
-        # self.click_rate = figclick()
+        # self.click_rate = cfg['agent']['com']
+        # self.click_rate = self.click_rate.split(',')
+        self.click_rate = figclick()
         self.test_budget = self.cmp * int(cfg['agent']['test_imp']) * C0/3
 
     def __init__(self):
@@ -81,8 +81,8 @@ class RlBidAgent():
         self.ctl_lambda = lamda
 
     def _reset_test(self):
-        # self._load_config()
-        self.budget = self.test_budget
+        self._load_config()
+        # self.budget = self.test_budget
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
@@ -149,7 +149,7 @@ class RlBidAgent():
         self.p = 0.0
         for i in range(t, 96):
             self.p += float(self.click_rate[i])
-        self.budget_t = self.res * float(self.click_rate[t])/self.p if self.p > 0 else self.res
+        self.budget_t = self.res * (float(self.click_rate[t])/self.p + 0.01) if self.p > 0 else self.res
         # self.rem_budget = self.budget_t
         self.budget_spend_t = 0.0
         self.eps = max(self.eps_start - self.anneal * self.t_step, 0.05)
