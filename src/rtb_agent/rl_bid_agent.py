@@ -150,6 +150,13 @@ class RlBidAgent():
         for i in range(t, 96):
             self.p += float(self.click_rate[i])
         self.budget_t = self.res * (float(self.click_rate[t])/self.p + 1/96) if self.p > 0 else self.res
+        # self.res = 9 / 10 * self.budget + (t + 1) / 960 * self.budget - self.budget_spend
+        # # self.budget_t = self.budget * float(self.click_rate[t]) if float(self.click_rate[t]) > 0 else self.res
+        # self.p = 0.0
+        # for i in range(t, 96):
+        #     self.p += float(self.click_rate[i])
+        # self.budget_t = self.res * (
+        #             float(self.click_rate[t]) / self.p) + 1 / 960 * self.budget if self.p > 0 else self.res
         # self.rem_budget = self.budget_t
         self.budget_spend_t = 0.0
         self.eps = max(self.eps_start - self.anneal * self.t_step, 0.05)
