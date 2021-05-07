@@ -7,6 +7,7 @@ sys.path.append("/Users/a/Budget_Constrained_Bidding/src/gym-auction_emulator")
 # sys.path.append(os.getcwd()+'/src/gym-auction_emulator')
 import gym, gym_auction_emulator
 import configparser
+import time
 
 """
 Simple toy constant bidding agent that constantly bids $1 until budget runs out
@@ -14,7 +15,7 @@ This is an example to show the OpenAI gym interface for the
     Budget Constrained Bidding problem.
 """
 
-C0 = 1/16
+C0 = 1/4
 
 class LinearBidAgent():
 
@@ -42,11 +43,10 @@ class LinearBidAgent():
         if state['weekday'] != self.cur_day:
             print("Total Impressions won with Budget={} Spend={} wins = {} reward = {}".format(self.budget, self.budget_spend, self.total_wins, self.total_rewards))
             # reallocate budget
-            self.budget_spend = 0
+            # self.budget_spend = 0
             # reset episode wins
             self.wins_e = 0
             self.cur_day = state['weekday']
-            
 
         # action = bid amount
         # send the best estimate of the bid
@@ -88,4 +88,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    for i in range(4):
+        start = time.time()
+        main()
+        end = time.time()
+        C0/=2
+        print('Running time: %s Seconds' % (end - start))
