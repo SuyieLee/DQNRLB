@@ -66,7 +66,6 @@ class RlBidAgent():
 
     def _reset_test(self):
         self._load_config()
-        # self.budget = self.test_budget
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
@@ -256,7 +255,7 @@ class RlBidAgent():
 
 def main():
     global C
-    for i in range(100):
+    for i in range(1):
         print(C)
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
