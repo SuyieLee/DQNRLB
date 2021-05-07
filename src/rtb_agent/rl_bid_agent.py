@@ -14,7 +14,7 @@ from dqn import Agent
 from reward_net import RewardNet
 import numpy as np
 
-C0 = 1/16
+C0 = 1/2
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
@@ -243,9 +243,9 @@ class RlBidAgent():
 
 
 def main():
-    global C
+    global C0
     for i in range(10):
-        print("duelingdqn Q={} C={}".format(Q, C))
+        print("duelingdqn Q={} C={}".format(Q, C0))
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
         env.seed(0)
@@ -284,7 +284,7 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
-        C += 2
+        C0 /= 2
 
 
 if __name__ == "__main__":
