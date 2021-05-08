@@ -14,7 +14,7 @@ from dqn import Agent
 from reward_net import RewardNet
 import numpy as np
 
-C0 = 1/4
+C0 = 1/2
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
