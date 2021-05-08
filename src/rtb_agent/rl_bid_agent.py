@@ -19,6 +19,7 @@ Q = 1e5
 anneal = 0.00005
 lamda = 1.0
 C=12
+sumcost = []
 
 
 class RlBidAgent():
@@ -157,13 +158,14 @@ class RlBidAgent():
         Returns the bid request cost based on the scaled version of the
         bid price using the DQN agent output.
         """
-        global ind
+        global sumcost
         episode_done = (state['weekday'] != self.cur_day)
         # within the time step
         if state['hour'] == self.cur_hour and state['weekday'] == self.cur_day:
             self._update_reward_cost(reward, cost)
         # within the episode, changing the time step
         elif state['hour'] != self.cur_hour and state['weekday'] == self.cur_day:
+            sumcost.append(self.budget_spend)
             self._update_step()
             # Sample a mini batch and perform grad-descent step
             self.reward_net.step()
@@ -192,6 +194,8 @@ class RlBidAgent():
             self.total_wins += self.wins_e
             self.total_spent += self.budget_spend
             print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(self.budget, self.budget_spend,self.total_wins, self.total_rewards))
+            print(sumcost)
+            sumcost = []
             self._reset_episode()
             self.cur_day = state['weekday']
             self.cur_hour = state['hour']
