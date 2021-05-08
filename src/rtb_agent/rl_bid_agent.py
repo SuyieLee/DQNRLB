@@ -19,6 +19,9 @@ Q = 1e5
 anneal = 0.00005
 lamda = 1.0
 C=12
+index = []
+ind = 1
+sumcost = []
 
 class RlBidAgent():
 
@@ -156,12 +159,17 @@ class RlBidAgent():
         Returns the bid request cost based on the scaled version of the
         bid price using the DQN agent output.
         """
+        global ind
         episode_done = (state['weekday'] != self.cur_day)
         # within the time step
         if state['hour'] == self.cur_hour and state['weekday'] == self.cur_day:
             self._update_reward_cost(reward, cost)
         # within the episode, changing the time step
         elif state['hour'] != self.cur_hour and state['weekday'] == self.cur_day:
+
+            index.append(ind)
+            sumcost.append(self.budget_spend)
+            ind += 1
             self._update_step()
             # Sample a mini batch and perform grad-descent step
             self.reward_net.step()
@@ -190,6 +198,13 @@ class RlBidAgent():
             self.total_wins += self.wins_e
             self.total_spent += self.budget_spend
             print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(self.budget, self.budget_spend,self.total_wins, self.total_rewards))
+            plt.title('Cumulative budget statistics')
+            plt.xlabel('time')
+            plt.ylabel('used budget')
+            plt.plot(index, sumcost)
+            plt.show()
+            print(sumcost)
+            ind = 1
             self._reset_episode()
             self.cur_day = state['weekday']
             self.cur_hour = state['hour']
@@ -198,6 +213,7 @@ class RlBidAgent():
         # action = bid amount
         # send the best estimate of the bid
         self.budget_spend += cost
+
         if cost > 0:
             self.wins_t += 1
             self.wins_e += 1
@@ -263,6 +279,7 @@ def main():
     print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
     print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
 
+
     print(' start testing-------------------')
     env.test_init()
     obs, reward, cost, done = env.reset()
@@ -288,3 +305,5 @@ if __name__ == "__main__":
     main()
     end = time.time()
     print('Running time: %s Seconds' % (end - start))
+    plt.plot([i for i in range(96)], sumcost)
+    plt.show()
