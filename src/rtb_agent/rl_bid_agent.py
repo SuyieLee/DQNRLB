@@ -258,7 +258,7 @@ def main():
         while not done:
             # action = bid amount
             action = agent.act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
+            next_obs, reward, cost, done = env.step(action, agent.budget)
             obs = next_obs # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
@@ -276,7 +276,7 @@ def main():
         while not done:
             # action = bid amount
             action = agent.test_act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
+            next_obs, reward, cost, done = env.step(action, agent.budget)
             obs = next_obs  # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
