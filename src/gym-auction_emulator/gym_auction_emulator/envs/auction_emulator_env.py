@@ -127,7 +127,8 @@ class AuctionEmulatorEnv(gym.Env):
 
         # mkt_price = max(self.slotprice, self.payprice)
         rctr = 0.008
-        gate = -4.18404795e-03 + rctr * 9.31356664e+00/ math.log(budget)
+        # gate = -4.18404795e-03 + rctr * 9.31356664e+00/ math.log(budget) 499 476 480
+        gate = 0.1060081/math.log(budget) - 0.77394169*rctr
         if self.click_prob > gate:
             mkt_price = self.payprice
             if action > mkt_price:
