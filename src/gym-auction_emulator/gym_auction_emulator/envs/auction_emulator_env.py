@@ -129,7 +129,12 @@ class AuctionEmulatorEnv(gym.Env):
         # gate = 5.29166666e-4+rctr*6.30445854e+4/(budget)
         # gate = -2.47439323e-03+ rctr * 6.03157148/math.log(budget)
         # gate = -4.77938026e-03 + rctr * 1.00059789e+01/math.log(budget) #result = [1e-4,2e-4,4e-4,8e-4,1e-3]
-        gate = 0.0012
+        gate = 0.1060081/math.log(budget) -0.77394169*rctr
+        # 0.00018990537723407707
+        # 0.0004677703863522698
+        # 0.0007709349870564956
+        # 0.001103019273343598
+        # 0.0014683685921014784
         if self.click_prob > gate:
             mkt_price = self.payprice
             if action > mkt_price:

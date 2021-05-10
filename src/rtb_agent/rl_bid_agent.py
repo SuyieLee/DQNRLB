@@ -14,7 +14,7 @@ from dqn import Agent
 from reward_net import RewardNet
 import numpy as np
 
-C0 = 1/32
+C0 = 1/8
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
@@ -27,7 +27,7 @@ def figclick():
     for x in range(96):
         # click = -1.364e-07*x*x*x + 1.979e-05*x*x - 0.0006152*x + 0.009323   #7天
         # click = 3.682e-09*x*x*x*x-8.519e-07*x*x*x + 6.418e-05*x*x - 0.001561*x + 0.01405
-        click = -1.523e-07*x*x*x + 2.16e-05*x*x - 0.0006727*x + 0.01003
+        click = -1.523e-07*x*x*x + 2.16e-05*x*x - 0.0006727*x + 0.01003  #
         sum += click
         click_rate.append(click)
     for x in range(96):
