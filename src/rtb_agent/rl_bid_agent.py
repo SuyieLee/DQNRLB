@@ -14,7 +14,7 @@ from dqn import Agent
 from reward_net import RewardNet
 import numpy as np
 
-C0 = 1/2
+C0 = 1/32
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
@@ -149,7 +149,7 @@ class RlBidAgent():
         self.p = 0.0
         for i in range(t, 96):
             self.p += float(self.click_rate[i])
-        self.budget_t = self.res * (float(self.click_rate[t])/self.p + 1/(96-t)) if self.p > 0 else self.res
+        self.budget_t = self.res * (float(self.click_rate[t])/self.p + 1/96) if self.p > 0 else self.res
         # self.res = 9 / 10 * self.budget + (t + 1) / 960 * self.budget - self.budget_spend
         # # self.budget_t = self.budget * float(self.click_rate[t]) if float(self.click_rate[t]) > 0 else self.res
         # self.p = 0.0
@@ -246,13 +246,13 @@ class RlBidAgent():
         return min(action, 300)
 
     def test_act(self, state, reward, cost):
-        global sumcost
+        # global sumcost
         # within the time steps
         if state['hour'] == self.cur_hour and state['weekday'] == self.cur_day:
             self._update_reward_cost(reward, cost)
         # within the episode, changing the time step
         elif state['hour'] != self.cur_hour and state['weekday'] == self.cur_day:
-            sumcost.append(self.budget_spend)
+            # sumcost.append(self.budget_spend)
             self._update_step()
             # Sample a mini batch and perform grad-descent step
             dqn_next_state = self._get_state()
@@ -268,8 +268,8 @@ class RlBidAgent():
             self.total_wins += self.wins_e
             self.total_spent += self.budget_spend
             print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(self.budget, self.budget_spend,self.total_wins, self.total_rewards))
-            print(sumcost)
-            sumcost = []
+            # print(sumcost)
+            # sumcost = []
             self._reset_episode()
             self.cur_day = state['weekday']
             self.cur_hour = state['hour']
@@ -302,7 +302,7 @@ def main():
         while not done:
             # action = bid amount
             action = agent.act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
+            next_obs, reward, cost, done = env.step(action, agent.budget)
             obs = next_obs # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
@@ -320,7 +320,7 @@ def main():
         while not done:
             # action = bid amount
             action = agent.test_act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
+            next_obs, reward, cost, done = env.step(action,agent.budget)
             obs = next_obs  # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e

@@ -4,7 +4,7 @@
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
-
+import math
 import configparser
 import json
 import os
@@ -108,7 +108,7 @@ class AuctionEmulatorEnv(gym.Env):
         # observation, reward, cost, done
         return self._get_observation(bid_req), 0.0, 0.0, False
 
-    def step(self, action):
+    def step(self, action, budget):
         """
         Args:
             action: bid response (bid_price)
@@ -125,7 +125,12 @@ class AuctionEmulatorEnv(gym.Env):
             raise ValueError(f"Invalid metric type: {self.metric}")
 
         # mkt_price = max(self.slotprice, self.payprice)
-        if self.click_prob > 5e-4:
+        rctr = 0.008
+        # gate = 5.29166666e-4+rctr*6.30445854e+4/(budget)
+        # gate = -2.47439323e-03+ rctr * 6.03157148/math.log(budget)
+        # gate = -4.77938026e-03 + rctr * 1.00059789e+01/math.log(budget) #result = [1e-4,2e-4,4e-4,8e-4,1e-3]
+        gate = 0.0012
+        if self.click_prob > gate:
             mkt_price = self.payprice
             if action > mkt_price:
                 # if self.auction_type == 'SECOND_PRICE':
