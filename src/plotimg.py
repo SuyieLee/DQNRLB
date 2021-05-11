@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
-C=[1/2*229405205/7,1/4*229405205/7,1/8*229405205/7,1/16*229405205/7,1/32*229405205/7]
-# C=[1/2*229405205/7,1/4*229405205/7,1/8*229405205/7,1/16*229405205/7,1/32*229405205/7,1/48*229405205/7,1/64*229405205/7,1/128*229405205/7]
+# C=[1/2*229405205/7,1/4*229405205/7,1/8*229405205/7,1/16*229405205/7,1/32*229405205/7]
+C=[1/2*229405205/7,1/4*229405205/7,1/8*229405205/7,1/16*229405205/7,1/32*229405205/7,1/48*229405205/7,1/64*229405205/7,1/128*229405205/7]
 result = [1e-4,5e-4,8e-4,1e-3,1.5e-3]
 rctr = 0.008
 
@@ -22,15 +22,15 @@ for i in range(len(C)):
     print(0.1060081/math.log(C[i]) -0.77394169*rctr)   # [1e-4,6e-4,8e-4,1e-3,1.5e-3]
 
 
-def funcinv(x, a, b):
-    return b*rctr + a/np.log(x)
+# def funcinv(x, a, b):
+#     return b*rctr + a/np.log(x)
+#
+#
+# res = curve_fit(funcinv, x, y, params)
+# print(res)
 
-
-res = curve_fit(funcinv, x, y, params)
-print(res)
-
-# plt.title('Threshold curve (rctr=0.0080)')
-# plt.xlabel('the size of budget')
-# plt.ylabel('Threshold')
-# plt.plot(C, [-2.47439323e-03+ rctr * 6.03157148/math.log(C[i]) for i in range(len(C))])
-# plt.show()
+plt.title('Threshold curve (rctr=0.0080)')
+plt.xlabel('the size of budget')
+plt.ylabel('Threshold')
+plt.plot(C, [0.1060081/math.log(C[i]) -0.77394169*rctr for i in range(len(C))])
+plt.show()
