@@ -7,18 +7,19 @@ import numpy as np
 import random
 from collections import namedtuple, deque
 
-from model import Network, NoisyDQN
+from model import NoisyDQN
 
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
-BATCH_SIZE = 32         # minibatch size
-GAMMA = 1.0            # discount factor
-TAU = 1e-3              # for soft update of target parameters
-LR = 1e-3               # learning rate 
-# UPDATE_EVERY = 12         # how often to update the network
+BATCH_SIZE = 32  # minibatch size
+GAMMA = 1.0  # discount factor
+TAU = 1e-3  # for soft update of target parameters
+LR = 1e-3  # learning rate
+MaxP = 1e9
+# UPDATE_EVERY = 4  # how often to update the network
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

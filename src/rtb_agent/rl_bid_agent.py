@@ -14,7 +14,7 @@ from dqn import Agent
 from reward_net import RewardNet
 import numpy as np
 
-C0 = 1/16
+C0 = 1/2
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
@@ -63,8 +63,7 @@ class RlBidAgent():
         self.ctl_lambda = lamda
 
     def _reset_test(self):
-        # self._load_config()
-        self.budget = self.test_budget
+        self._load_config()
         self.BETA = [-0.08, -0.03, -0.01, 0, 0.01, 0.03, 0.08]
         self.eps_start = 0.95
         self.eps_end = 0.05
@@ -167,7 +166,7 @@ class RlBidAgent():
             # Sample a mini batch and perform grad-descent step
             self.reward_net.step()
             dqn_next_state = self._get_state()
-            a_beta = self.dqn_agent.act(dqn_next_state, eps=self.eps)
+            a_beta = self.dqn_agent.test_act(dqn_next_state, eps=self.eps)
             sa = np.append(self.dqn_state, self.dqn_action)
             rnet_r = float(self.reward_net.act(sa))
             # call agent step
@@ -244,7 +243,9 @@ class RlBidAgent():
 
 
 def main():
-    for i in range(100):
+    global C0
+    for i in range(5):
+        print("noisy dqn on C0={}".format(C0))
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
         env.seed(0)
@@ -265,6 +266,7 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
 
+
         print(' start testing-------------------')
         env.test_init()
         obs, reward, cost, done = env.reset()
@@ -283,6 +285,7 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
+    C0 /= 2
 
 
 if __name__ == "__main__":
