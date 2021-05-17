@@ -28,17 +28,32 @@ class Network(nn.Module):
         """
         super(Network, self).__init__()
         self.seed = torch.manual_seed(seed)
-        self.fc1 = nn.Linear(state_size, fc1_units)
-        self.fc2 = nn.Linear(fc1_units, fc2_units)
-        self.fc3 = nn.Linear(fc2_units, fc3_units)
-        self.fc4 = nn.Linear(fc3_units, action_size)
+
+        self.feature = nn.Sequential(
+            nn.Linear(state_size, fc1_units),
+            nn.ReLU(),
+            nn.Linear(fc1_units, fc2_units),
+            nn.ReLU()
+        )
+
+        self.advantage = nn.Sequential(
+            nn.Linear(fc2_units, fc3_units),
+            nn.ReLU(),
+            nn.Linear(fc3_units, action_size)
+        )
+
+        self.value = nn.Sequential(
+            nn.Linear(fc2_units, fc3_units),
+            nn.ReLU(),
+            nn.Linear(fc3_units, 1)
+        )
 
     def forward(self, state):
         """Build a network that maps state -> action values."""
-        x = F.relu(self.fc1(state))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        return self.fc4(x)
+        x = self.feature(state)
+        advantage = self.advantage(x)
+        value = self.value(x)
+        return value + advantage - advantage.mean()
 
 
 class NoisyLinear(nn.Module):
@@ -99,15 +114,19 @@ class NoisyDQN(nn.Module):
 
         self.linear = nn.Linear(num_inputs, fc1_units)
         self.noisy1 = NoisyLinear(fc1_units, fc2_units)
-        self.noisy2 = NoisyLinear(fc2_units, fc3_units)
-        self.noisy3 = NoisyLinear(fc3_units, num_outputs)
+        self.advantage1 = NoisyLinear(fc2_units, fc3_units)
+        self.advantage2 = NoisyLinear(fc2_units, num_outputs)
+        self.value1 = NoisyLinear(fc2_units, fc3_units)
+        self.value2 = NoisyLinear(fc3_units,1)
 
     def forward(self, x):
         x = F.relu(self.linear(x))
         x = F.relu(self.noisy1(x))
-        x = F.relu(self.noisy2(x))
-        x = self.noisy3(x)
-        return x
+        advantage = F.relu(self.advantage1(x))
+        advantage = F.relu(self.advantage2(advantage))
+        value = F.relu(self.value1(x))
+        value = F.relu(self.value2(value))
+        return value + advantage - advantage.mean()
 
     def act(self, state):
         state = torch.FloatTensor(state).unsqueeze(0)
@@ -117,5 +136,7 @@ class NoisyDQN(nn.Module):
 
     def reset_noise(self):
         self.noisy1.reset_noise()
-        self.noisy2.reset_noise()
-        self.noisy3.reset_noise()
+        self.advantage1.reset_noise()
+        self.advantage2.reset_noise()
+        self.value1.reset_noise()
+        self.value2.reset_noise()
