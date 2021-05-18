@@ -87,8 +87,9 @@ class Network(nn.Module):
 
 
 class NoisyLinear(nn.Module):
-    def __init__(self, in_features, out_features, std_init=0.4):
+    def __init__(self, in_features, out_features, seed, std_init=0.4):
         super(NoisyLinear, self).__init__()
+        self.seed = torch.manual_seed(seed)
 
         self.in_features = in_features
         self.out_features = out_features
