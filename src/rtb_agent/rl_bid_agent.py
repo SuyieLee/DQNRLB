@@ -18,7 +18,7 @@ C0 = 1/2
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
-C=12
+C=8
 
 class RlBidAgent():
 
@@ -245,7 +245,7 @@ class RlBidAgent():
 def main():
     global C0
     for i in range(5):
-        print("noisy dqn on C0={}".format(C0))
+        print("noisy dqn on C={}".format(C0))
         # Instantiate the Environment and Agent
         env = gym.make('AuctionEmulator-v0')
         env.seed(0)

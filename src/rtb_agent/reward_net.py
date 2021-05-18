@@ -7,7 +7,7 @@ import numpy as np
 import random
 from collections import namedtuple, deque, defaultdict
 
-from model import Network
+from model import Network, RewardNetwork
 
 import torch
 import torch.nn.functional as F
@@ -36,7 +36,7 @@ class RewardNet():
         self.seed = random.seed(seed)
 
         # Reward-Network
-        self.reward_net = Network(state_action_size, reward_size, seed).to(device)
+        self.reward_net = RewardNetwork(state_action_size, reward_size, seed).to(device)
         self.optimizer = optim.Adam(self.reward_net.parameters(), lr=LR)
 
         # Replay memory
