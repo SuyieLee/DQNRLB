@@ -18,7 +18,7 @@ C0 = 1/2
 Q = 1e5
 anneal = 0.00005
 lamda = 1.0
-C=8
+C=16
 
 class RlBidAgent():
 
