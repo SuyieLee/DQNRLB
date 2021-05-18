@@ -123,9 +123,9 @@ class NoisyDQN(nn.Module):
         x = F.relu(self.linear(x))
         x = F.relu(self.noisy1(x))
         advantage = F.relu(self.advantage1(x))
-        advantage = F.relu(self.advantage2(advantage))
+        advantage = self.advantage2(advantage)
         value = F.relu(self.value1(x))
-        value = F.relu(self.value2(value))
+        value = self.value2(value)
         return value + advantage - advantage.mean()
 
     def act(self, state):
