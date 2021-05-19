@@ -285,7 +285,7 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
-        C /= 2
+        C0 /= 2
 
 
 if __name__ == "__main__":

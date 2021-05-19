@@ -143,10 +143,10 @@ class NoisyDQN(nn.Module):
         self.seed = torch.manual_seed(seed)
 
         self.linear = nn.Linear(num_inputs, fc1_units)
-        self.noisy1 = NoisyLinear(fc1_units, fc2_units)
-        self.advantage1 = NoisyLinear(fc2_units, fc3_units)
+        self.noisy1 = nn.Linear(fc1_units, fc2_units)
+        self.advantage1 = nn.Linear(fc2_units, fc3_units)
         self.advantage2 = NoisyLinear(fc2_units, num_outputs)
-        self.value1 = NoisyLinear(fc2_units, fc3_units)
+        self.value1 = nn.Linear(fc2_units, fc3_units)
         self.value2 = NoisyLinear(fc3_units,1)
 
     def forward(self, x):
@@ -165,9 +165,9 @@ class NoisyDQN(nn.Module):
         return action
 
     def reset_noise(self):
-        self.noisy1.reset_noise()
-        self.advantage1.reset_noise()
+        # self.noisy1.reset_noise()
+        # self.advantage1.reset_noise()
         self.advantage2.reset_noise()
-        self.value1.reset_noise()
+        # self.value1.reset_noise()
         self.value2.reset_noise()
 
