@@ -6,6 +6,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 
 import configparser
+import math
 import json
 import os
 import pandas as pd
@@ -108,7 +109,7 @@ class AuctionEmulatorEnv(gym.Env):
         # observation, reward, cost, done
         return self._get_observation(bid_req), 0.0, 0.0, False
 
-    def step(self, action):
+    def step(self, action,budget):
         """
         Args:
             action: bid response (bid_price)
@@ -125,12 +126,15 @@ class AuctionEmulatorEnv(gym.Env):
             raise ValueError(f"Invalid metric type: {self.metric}")
 
         # mkt_price = max(self.slotprice, self.payprice)
-        # if self.click_prob > 1e-3 and self.click_prob < 0.8:
-        mkt_price = self.payprice
-        if action > mkt_price:
-            # if self.auction_type == 'SECOND_PRICE':
-            r = r_p
-            c = mkt_price
+        rctr = 0.008
+        # gate = -4.18404795e-03 + rctr * 9.31356664e+00/ math.log(budget) 499 476 480
+        gate = 0.1060081/math.log(budget) - 0.77394169*rctr
+        if self.click_prob > gate:
+            mkt_price = self.payprice
+            if action > mkt_price:
+                # if self.auction_type == 'SECOND_PRICE':
+                r = r_p
+                c = mkt_price
                 # elif self.auction_type == 'FIRST_PRICE':
                 # r = r_p
                 # c = action

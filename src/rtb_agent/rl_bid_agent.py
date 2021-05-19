@@ -258,14 +258,13 @@ def main():
         while not done:
             # action = bid amount
             action = agent.act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
+            next_obs, reward, cost, done = env.step(action, agent.budget)
             obs = next_obs # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
         agent.total_spent += agent.budget_spend
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
-
 
         print(' start testing-------------------')
         env.test_init()
@@ -277,7 +276,7 @@ def main():
         while not done:
             # action = bid amount
             action = agent.test_act(obs, reward, cost)
-            next_obs, reward, cost, done = env.step(action)
+            next_obs, reward, cost, done = env.step(action, agent.budget)
             obs = next_obs  # Next state assigned to current state
             # done = agent.done()
         agent.total_wins += agent.wins_e
@@ -285,7 +284,7 @@ def main():
         print("Total Impressions won with Budget={} Spend={} wins = {} click = {}".format(agent.budget, agent.budget_spend,agent.total_wins,agent.total_rewards))
         print("Total Impressions cmp {} epcp {} value = {}".format(agent.total_spent/agent.total_wins*1000, agent.total_spent/agent.total_rewards, agent.total_rewards))
         env.close()
-        C /= 2
+        C0 /= 2
 
 
 if __name__ == "__main__":
