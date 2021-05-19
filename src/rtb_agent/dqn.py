@@ -116,6 +116,7 @@ class Agent():
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        print("loss = {}".format(loss))
 
         # ------------------- update target network ------------------- #
         self.qnetwork_target.reset_noise()
